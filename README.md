@@ -2,7 +2,7 @@
 
 ## Project Vision
 
-Modern Continuous Integration and Delivery (CI/CD) pipelines are ephemeral in nature — built quick, running briefly, and vanishing without a trace. Yet these short lived environments remain largely unmonitored, creating a critical blind spot. Inspired by traditional "Host-Based Sensors (HBS)" and "Cloud-Based Sensors (CBS)," I introduce **Ghost-Based Sensors (GBS)** which is my attempt to gain deeper visibility into these transient, short-lived build and deployment environments.
+Modern Continuous Integration and Delivery (CI/CD) pipelines are ephemeral in nature. Built Quick, Run Quick, Die Quick ... they vanishing once theyre done. Yet these short lived environments remain largely unmonitored, creating a critical blind spot. Inspired by traditional "Host-Based Sensors (HBS)" and "Cloud-Based Sensors (CBS)," I introduce **Ghost-Based Sensors (GBS)** which is my attempt to gain deeper visibility into these transient, short-lived build and deployment environments.
 
 ## Why Ghost-Based Sensors?
 
