@@ -30,6 +30,7 @@ jobs:
         mode: analyze
   
   analyze-foo:
+    needs: foo 
     runs-on: ubuntu-latest
     permissions:
       contents: read
