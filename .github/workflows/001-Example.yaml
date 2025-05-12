@@ -1,0 +1,42 @@
+---
+name: Falco Count Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  count-test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+
+    steps:
+      - name: Start Falco (live mode)
+        uses: falcosecurity/falco-actions/start@v1.1.3
+        with:
+          mode: live
+          falco-version: '0.39.0'
+          verbose: true
+
+      - name: Count for 10 seconds
+        run: |
+          echo "Counting for 10 seconds…"
+          for i in $(seq 1 10); do
+            echo "  → $i"
+            sleep 1
+          done
+
+      - name: Stop Falco and save alerts
+        uses: falcosecurity/falco-actions/stop@v1.1.3
+        with:
+          mode: live
+          verbose: true
+          output-file: falco-alerts.json
+
+      - name: Upload Falco alerts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: falco-alerts
+          path: falco-alerts.json
