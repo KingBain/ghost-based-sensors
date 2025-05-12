@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: Start Falco (live mode)
-        uses: falcosecurity/falco-actions/start@v1.1.3
+        uses: falcosecurity/falco-actions/start@e23d661998204b25988e4655899418e46924a68b
         with:
           mode: live
           falco-version: '0.39.0'
@@ -28,7 +28,7 @@ jobs:
           done
 
       - name: Stop Falco and save alerts
-        uses: falcosecurity/falco-actions/stop@v1.1.3
+        uses: falcosecurity/falco-actions/stop@e23d661998204b25988e4655899418e46924a68b
         with:
           mode: live
           verbose: true
