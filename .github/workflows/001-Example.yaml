@@ -36,7 +36,7 @@ jobs:
 
       - name: Upload Falco alerts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: falco-alerts
           path: falco-alerts.json
