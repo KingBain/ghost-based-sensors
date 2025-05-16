@@ -34,6 +34,16 @@ jobs:
           echo "npm not found, skipping Node snapshot" >&2
         fi
       
+    - name: Get changed files
+      id: changed-files
+      uses: tj-actions/changed-files@ed68ef82c095e0d48ec87eccea555d944a631a4c # v46
+
+    - name: Save changed‑files list
+      env:
+        ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+      run: |
+        # Write each changed file on its own line
+        printf "%s\n" ${ALL_CHANGED_FILES} > changed-files.txt    
 
     - name: Snapshot Python Packages
       shell: bash
