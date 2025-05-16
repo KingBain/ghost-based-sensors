@@ -1,11 +1,11 @@
 ---
-name: Falco Count Test
+name: Ghost Based Sensors Example
 
 on:
   workflow_dispatch:
 
 jobs:
-  foo:
+  fish:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -24,13 +24,43 @@ jobs:
           sleep 1
         done
 
+    - name: Snapshot Node.js Packages
+      shell: bash
+      run: |
+        echo "Recording Node.js packages…" >&2
+        if command -v npm &>/dev/null; then
+          npm ls --json --depth=0 > node-packages.json
+        else
+          echo "npm not found, skipping Node snapshot" >&2
+        fi
+      
+
+    - name: Snapshot Python Packages
+      shell: bash
+      run: |
+        echo "Recording Python packages…" >&2
+        if command -v pip &>/dev/null; then
+          pip list --format=json > python-packages.json
+        else
+          echo "pip not found, skipping Python snapshot" >&2
+        fi
+      
+    - name: Upload Package Manifests
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: package-manifests
+        path: |
+          node-packages.json
+          python-packages.json
+
     - name: Stop Falco
       uses: falcosecurity/falco-actions/stop@e23d661998204b25988e4655899418e46924a68b
       with:
         mode: analyze
   
-  analyze-foo:
-    needs: foo 
+  sauce:
+    needs: fish 
     runs-on: ubuntu-latest
     permissions:
       contents: read
