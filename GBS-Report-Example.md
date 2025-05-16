@@ -75,6 +75,6 @@ This document describes the structure and contents of the Ghost-Based Sensors (G
 
 These artifacts can be downloaded from the Actions UI for deep forensic analysis or ingestion into your SIEM.
 
----
+## 5. Screenshots
 
-*End of report description.*
+![image](https://github.com/user-attachments/assets/db9a3e13-08c4-4013-ab24-3373e3c3696c)
