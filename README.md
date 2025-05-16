@@ -21,6 +21,17 @@ Leveraging lightweight instrumentation and eBPF-based telemetry, Ghost-Based Sen
 
 Because of how actions and pipelines are executed, just whats happening inside the pipeline/action will be monitored, but in the grand scheme of things thats where our code lives, so its the right spot to start listening
 
+## Who Is This For?
+
+Ghost‑Based Sensors (GBS) is tailored for teams and individuals who:
+
+- **Rely on Shared/Public Runners:** You only have access to GitHub Actions, Azure Pipelines, or other public CI/CD runners—not self‑hosted agents.  
+- **Work with Unclassified or Public Code:** Your projects don’t handle classified data, but you still need strong observability.  
+- **Can’t Deploy Dedicated Monitoring Services:** You lack the resources or permissions to stand up long‑running agents, SIEMs, or logging infrastructures.  
+- **Want to Build Their Own Reports:** You prefer open‑source, customizable tooling to generate your own forensic and audit reports.  
+- **Need to Meet Observability Controls:** You must comply with standards like NIST or Canada’s GC ITSG‑33 for visibility, logging, and traceability in your software supply chain.  
+
+
 ## What Ghost-Based Sensors Will NOT Do
 
 * **Prevention or Enforcement:** GBS is strictly focused on visibility and traceability. While prevention and active blocking of threats are important, they are outside the scope of this project.
