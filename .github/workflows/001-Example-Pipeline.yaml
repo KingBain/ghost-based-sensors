@@ -27,7 +27,7 @@ jobs:
           echo "  → $i"
           sleep 1
         done
-        
+
 # END - Normal Pipeline Workload
     - name: Snapshot Node.js Packages
       shell: bash
@@ -60,7 +60,7 @@ jobs:
           echo "pip not found, skipping Python snapshot" >&2
         fi
       
-    - name: Upload Package Manifests
+    - name: Upload Pipeline Manifests
       if: always()
       uses: actions/upload-artifact@v4
       with:
@@ -68,6 +68,7 @@ jobs:
         path: |
           node-packages.json
           python-packages.json
+          changed-files.txt
 
     - name: Stop Falco
       uses: falcosecurity/falco-actions/stop@e23d661998204b25988e4655899418e46924a68b
