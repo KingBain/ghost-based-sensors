@@ -15,7 +15,11 @@ jobs:
       uses: falcosecurity/falco-actions/start@e23d661998204b25988e4655899418e46924a68b
       with:
         mode: analyze
-        
+
+# BEGIN - Normal Pipeline Workload
+    - name: Checkout repository
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
     - name: Count for 10 seconds
       run: |
         echo "Counting for 10 seconds…"
@@ -23,7 +27,8 @@ jobs:
           echo "  → $i"
           sleep 1
         done
-
+        
+# END - Normal Pipeline Workload
     - name: Snapshot Node.js Packages
       shell: bash
       run: |
