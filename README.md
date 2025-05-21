@@ -1,4 +1,4 @@
-# 👻Ghost-Based Sensors (GBS): Observability for Ephemeral CI/CD Pipelines
+# Ghost-Based Sensors (GBS): Observability for Ephemeral CI/CD Pipelines
 Ghost-Based Sensors (GBS) is a lightweight observability layer designed for ephemeral CI/CD environments like GitHub Actions or Azure Pipelines. It provides compliance-grade visibility without requiring dedicated agents or full system access.
 
 ## Project Vision
