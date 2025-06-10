@@ -10,27 +10,27 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
+
+      - name: Show triggering run info
+        run: |
+          echo "Triggered by run: ${{ github.event.workflow_run.id }}"
+          echo "Run number:     ${{ github.event.workflow_run.run_number }}"
+          echo "Commit SHA:     ${{ github.event.workflow_run.head_sha }}"
+          echo "Branch:         ${{ github.event.workflow_run.head_branch }}"
+          echo "Triggered by:   ${{ github.event.workflow_run.actor }}"
+          echo "URL:            ${{ github.event.workflow_run.html_url }}"
+
+
       - name: Authenticate GitHub CLI
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
 
-      - name: List and download “capture” artifact
-        id: fetch
+      - name: Download the “capture” artifact
         run: |
-          # 1) find the artifact ID
-          id=$(gh api \
-            repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}/artifacts \
-            -q '.artifacts[] | select(.name=="capture") | .id')
-          echo "artifact_id=$id" >> $GITHUB_OUTPUT
-
-      - name: Download and unpack capture.zip
-        if: steps.fetch.outputs.artifact_id
-        run: |
-          gh api \
-            -H "Accept: application/vnd.github+json" \
-            repos/${{ github.repository }}/actions/artifacts/${{ steps.fetch.outputs.artifact_id }}/zip \
-            --output capture.zip
-          unzip capture.zip -d capture
+          gh run download ${{ github.event.workflow_run.id }} \
+            -n capture \
+            -D ./capture
+          # This will extract “capture.scap” into ./capture/
 
       - name: Install Sysdig CLI
         run: |
