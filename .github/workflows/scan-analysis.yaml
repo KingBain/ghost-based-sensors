@@ -1,0 +1,19 @@
+on:
+  workflow_run:
+    workflows: ["Ghost Based Sensors Example"]
+    types: [completed]
+
+jobs:
+  next-step:
+    # only run on success, for example
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Show triggering run info
+        run: |
+          echo "Triggered by run: ${{ github.event.workflow_run.id }}"
+          echo "Run number:     ${{ github.event.workflow_run.run_number }}"
+          echo "Commit SHA:     ${{ github.event.workflow_run.head_sha }}"
+          echo "Branch:         ${{ github.event.workflow_run.head_branch }}"
+          echo "Triggered by:   ${{ github.event.workflow_run.actor }}"
+          echo "URL:            ${{ github.event.workflow_run.html_url }}"
