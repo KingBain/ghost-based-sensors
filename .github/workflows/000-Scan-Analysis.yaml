@@ -1,3 +1,5 @@
+name: Artifact Analysis
+
 on:
   workflow_run:
     workflows: ["Ghost Based Sensors Example"]
