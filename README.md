@@ -3,7 +3,7 @@ Ghost-Based Sensors (GBS) is a lightweight observability layer designed for ephe
 
 ## Project Vision
 
-Modern Continuous Integration and Delivery (CI/CD) pipelines are ephemeral in nature. Built Quick, Run Quick, Die Quick ... they vanishing once theyre done. Yet these short lived environments remain largely unmonitored, creating a critical blind spot. Inspired by traditional "Host-Based Sensors (HBS)" and "Cloud-Based Sensors (CBS)," I introduce **Ghost-Based Sensors (GBS)** which is my attempt to gain deeper visibility into these transient, short-lived build and deployment environments.
+Modern Continuous Integration and Delivery (CI/CD) pipelines are ephemeral in nature. Built Quick, Run Quick, Die Quick ... they vanishing once theyre completed their job. Yet these short lived environments remain largely unmonitored, creating a critical blind spot. Inspired by traditional "[Host-Based Sensors (HBS)](https://www.cyber.gc.ca/en/news-events/host-based-sensors)" and "[Cloud-Based Sensors (CBS)](https://www.cse-cst.gc.ca/en/accountability/transparency/reports/communications-security-establishment-annual-report-2022-2023)," I introduce **Ghost-Based Sensors (GBS)** which is my attempt to gain deeper visibility into these transient, short-lived build and deployment environments.
 
 ## Why Ghost-Based Sensors?
 
@@ -80,9 +80,9 @@ Use this pipeline as a template for your own public CI/CD workflows to harness t
 ### ASCII Fallback
 
 ```
-CI/CD Job Start
-     |
-     v
+       CI/CD Job Start
+              |
+              v
 +--------------------------+
 |   Launch GBS Entrypoint  |
 +--------------------------+
