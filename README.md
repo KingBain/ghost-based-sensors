@@ -1,4 +1,5 @@
-# 👻Ghost-Based Sensors (GBS): Observability for Ephemeral CI/CD Pipelines
+# Ghost-Based Sensors (GBS): Observability for Ephemeral CI/CD Pipelines
+Ghost-Based Sensors (GBS) is a lightweight observability layer designed for ephemeral CI/CD environments like GitHub Actions or Azure Pipelines. It provides compliance-grade visibility without requiring dedicated agents or full system access.
 
 ## Project Vision
 
@@ -46,6 +47,14 @@ GBS will deploy as a containerized sensor, injected into CI pipelines via a cust
 2. Collect detailed telemetry data throughout the build and test steps.
 3. Export telemetry logs as artifacts immediately before the ephemeral environment disappears.
 
+##  Getting Started
+
+1. Add the GBS container or setup action to your CI job.
+2. Launch the tracer via your container entrypoint or `pre` step.
+3. Run your build/test/deploy steps as usual.
+4. Stop sensors, collect data, and upload artifacts for analysis.
+
+
 ## Example Pipeline
 
 An **example pipeline** demonstrates how to integrate Ghost-Based Sensors into your CI workflow. You can find it at:
@@ -66,11 +75,147 @@ This reference pipeline showcases:
 
 Use this pipeline as a template for your own public CI/CD workflows to harness the full power of GBS within ephemeral runners.
 
+##  GBS Architecture Diagram
+
+### ASCII Fallback
+
+```
+CI/CD Job Start
+     |
+     v
++--------------------------+
+|   Launch GBS Entrypoint  |
++--------------------------+
+     |        |        |
+     v        v        v
+ eBPF     tcpdump   Metrics Server
+ Tracer   (fallback)     |
+     \        |        /
+      \       v       /
+        --> Trace Events
+              |
+              v
+       +--------------+
+       | Generate Logs |
+       +--------------+
+              |
+              v
+     Upload Artifacts (capture.tar.gz, hashes.json, etc)
+              |
+              v
+     Forensics / SIEM Integration
+```
+
+
 ## Goals and Benefits
 
 * **Full Pipeline Observability:** Transforms ephemeral runners into transparent, auditable environments.
 * **Easy Integration:** Designed to be plug-and-play for popular CI providers, with minimal configuration.
 * **Forensic Capability:** Provides critical post-event analysis to rapidly identify, diagnose, and respond to potential security incidents.
+
+---
+
+##  Common Issues & Fixes
+
+This section helps you diagnose and resolve common problems when using Ghost-Based Sensors (GBS) in ephemeral CI/CD environments like GitHub Actions or Azure Pipelines.
+
+
+###  Issue: eBPF Tracing Fails to Start
+
+**Symptoms**:
+- No telemetry collected in `capture` artifact
+- Logs contain:  
+  ```sh
+  failed to load BPF program: operation not permitted
+  ```
+  or  
+  ```sh
+  BPF not supported by kernel
+  ```
+
+**Likely Causes**:
+- CI runner kernel doesn't support eBPF (older kernel version)
+- Missing Linux capabilities (e.g., `CAP_SYS_ADMIN`)
+- BPF tooling (e.g., `bpftool`, `bcc`) not installed in container
+
+**Fixes**:
+1.  Ensure runner supports eBPF. GitHub-hosted Ubuntu runners `ubuntu-latest` (>=20.04) generally support BPF.
+2.  Use `privileged: true` if running in Docker-in-Docker or custom runner (not supported on GitHub-hosted runners).
+3.  Confirm `bpftool` and required libraries (libbpf, libelf) are installed in your container image.
+4.  Use the fallback `tcpdump` mode in environments that lack eBPF support.
+
+---
+
+###  Issue: Metrics Server Fails or Crashes
+
+**Symptoms**:
+- No port scraping metrics visible
+- Logs show Python or Go traceback:
+  ```sh
+  OSError: [Errno 98] Address already in use
+  ```
+  or  
+  ```sh
+  ImportError: No module named 'prometheus_client'
+  ```
+
+**Likely Causes**:
+- Port `9090` or similar already in use
+- Required runtime packages are missing (e.g., `prometheus_client` for Python, or Go metrics binary not compiled)
+
+**Fixes**:
+1.  Change metrics server port using the `METRICS_PORT` environment variable:
+   ```yaml
+   env:
+     METRICS_PORT: 9191
+   ```
+2.  Install missing packages in the container Dockerfile:
+   ```Dockerfile
+   pip install prometheus_client
+   ```
+3.  Confirm entrypoint script doesn’t background the metrics process too early (avoid `&` if startup order matters).
+
+---
+
+###  Issue: Artifact Upload Fails
+
+**Symptoms**:
+- Artifacts not visible in GitHub Actions tab
+- Logs show:
+  ```sh
+  No such file or directory: 'capture.tar.gz'
+  ```
+  or  
+  ```sh
+  Artifact upload step skipped or failed
+  ```
+
+**Likely Causes**:
+- Capture files not generated due to earlier tracer failure
+- Artifact paths misaligned or missing
+- Upload step runs **before** artifacts are saved
+
+**Fixes**:
+1.  Use `post` job steps or conditional logic to delay upload:
+   ```yaml
+   if: always()
+   ```
+2.  Verify correct file path:
+   ```yaml
+   path: ./output/capture.tar.gz
+   ```
+3.  Add a debug step before upload to confirm files exist:
+   ```yaml
+   - run: ls -lh ./output
+   ```
+
+---
+
+##  License
+
+MIT License. See [LICENSE](LICENSE) for details.
+
+---
 
 ## Getting Involved
 
