@@ -7,15 +7,56 @@ on:
 
 jobs:
   next-step:
-    # only run on success, for example
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Show triggering run info
+
+      - name: List and download “capture” artifact
+        id: fetch
         run: |
-          echo "Triggered by run: ${{ github.event.workflow_run.id }}"
-          echo "Run number:     ${{ github.event.workflow_run.run_number }}"
-          echo "Commit SHA:     ${{ github.event.workflow_run.head_sha }}"
-          echo "Branch:         ${{ github.event.workflow_run.head_branch }}"
-          echo "Triggered by:   ${{ github.event.workflow_run.actor }}"
-          echo "URL:            ${{ github.event.workflow_run.html_url }}"
+          # 1) find the artifact ID
+          id=$(gh api \
+            repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}/artifacts \
+            -q '.artifacts[] | select(.name=="capture") | .id')
+          echo "artifact_id=$id" >> $GITHUB_OUTPUT
+
+      - name: Download and unpack capture.zip
+        if: steps.fetch.outputs.artifact_id
+        run: |
+          gh api \
+            -H "Accept: application/vnd.github+json" \
+            repos/${{ github.repository }}/actions/artifacts/${{ steps.fetch.outputs.artifact_id }}/zip \
+            --output capture.zip
+          unzip capture.zip -d capture
+
+      - name: Install Sysdig CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sysdig unzip
+
+      - name: Extract unique DNS domains
+        run: |
+          sysdig -r capture/capture.scap \
+            "evt.type=dns_response" -p "%fd.dns.resp.name" \
+            | sort -u > dns-domains.txt
+          echo "Found $(wc -l < dns-domains.txt) distinct domains"
+
+      - name: Check domains against OTX
+        if: ${{ steps.fetch.outputs.artifact_id }}
+        env:
+          OTX_API_KEY: ${{ secrets.OTX_API_KEY }}   # store your AlienVault OTX key in repo secrets
+        run: |
+          echo "domain,reputation" > otx-results.csv
+          while read domain; do
+            echo -n "Checking $domain… "
+            resp=$(curl -s \
+              -H "X-OTX-API-KEY: $OTX_API_KEY" \
+              "https://otx.alienvault.com/api/v1/indicators/domain/${domain}/reputation")
+            # extract the `reputation` field (–100 to +100)
+            rep=$(echo "$resp" | jq -r '.reputation // 0')
+            echo "$rep"
+            echo "${domain},${rep}" >> otx-results.csv
+          done < dns-domains.txt
+
+          echo "### Malicious Results (rep≠0)"
+          grep -v ',0$' otx-results.csv || echo "None flagged"
