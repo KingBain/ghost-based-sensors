@@ -87,3 +87,4 @@ jobs:
       uses: falcosecurity/falco-actions/analyze@4a4ff48cca452b3b03f06073d1ae0ff564503fc9
       with:
         falco-version: '0.39.0'
+        VT_API_KEY: ${{ secrets.VT_API_KEY }}
