@@ -15,10 +15,11 @@ Leveraging lightweight instrumentation and eBPF-based telemetry, Ghost-Based Sen
 
 | Feature                 | Description                                                                                        | Method                  |
 | ----------------------- | -------------------------------------------------------------------------------------------------- | ----------------------- |
-| Process Telemetry       | Logs every process execution and command-line argument used during pipeline runs                   | eBPF tracing            |
-| File System Activity    | Monitors file creations, deletions, and modifications to detect suspicious changes                 | Kernel event monitoring |
+| Process Telemetry       | Logs every process execution and command-line argument used during pipeline runs                   | Process Monitoring      |
+| File System Activity    | Monitors file creations, deletions, and modifications to detect suspicious changes                 | File systyem monitoring |
 | Network Connections/DNS | Records all outbound connections and DNS lookups to reveal data exfiltration or unauthorized calls | Network monitoring      |
-| System Call Tracing     | Captures granular syscall data to detect anomalies such as privilege escalations                   | eBPF syscall tracing    |
+
+A lot of this moniroting is done using the Falco (Sysdig) eBPF probe, which listens to permitted kernal events.
 
 Because of how actions and pipelines are executed, just whats happening inside the pipeline/action will be monitored, but in the grand scheme of things thats where our code lives, so its the right spot to start listening
 
