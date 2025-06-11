@@ -16,6 +16,7 @@ jobs:
       uses: falcosecurity/falco-actions/start@4a4ff48cca452b3b03f06073d1ae0ff564503fc9
       with:
         mode: analyze
+        verbose: true
 
 # BEGIN - Normal Pipeline Workload
     - name: Checkout repository
