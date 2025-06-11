@@ -84,7 +84,7 @@ jobs:
       actions: read
     steps:
     - name: Analyze
-      uses: KingBain/falco-actions/analyze@main
+      uses: KingBain/falco-actions/analyze@domain
       with:
         falco-version: '0.39.0'
       env:
