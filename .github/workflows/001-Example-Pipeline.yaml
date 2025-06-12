@@ -31,6 +31,12 @@ jobs:
         done
 
 # END - Normal Pipeline Workload
+
+    - name: Stop Sysdig System Capture
+      uses: falcosecurity/falco-actions/stop@4a4ff48cca452b3b03f06073d1ae0ff564503fc9
+      with:
+        mode: analyze
+        
     - name: Snapshot Node.js Packages
       shell: bash
       run: |
@@ -71,12 +77,7 @@ jobs:
           node-packages.json
           python-packages.json
           changed-files.txt
-
-    - name: Stop Sysdig System Capture
-      uses: falcosecurity/falco-actions/stop@4a4ff48cca452b3b03f06073d1ae0ff564503fc9
-      with:
-        mode: analyze
-  
+          
   sauce:
     needs: fish 
     runs-on: ubuntu-latest
