@@ -1,5 +1,5 @@
 # Ghost-Based Sensors (GBS): Observability for Ephemeral CI/CD Pipelines
-Ghost-Based Sensors is an open-source project that brings compliance-grade, syscall-level observability to ephemeral CI/CD pipelines. Under the hood it leverages [Falco for Actions](https://github.com/falcosecurity/falco-actions) as its engine—automating start/stop, rule injection, telemetry capture, and artifact packaging so you don’t have to deal with low-level configuration.
+Ghost-Based Sensors (GBS) is a lightweight observability layer designed for ephemeral CI/CD environments like GitHub Actions or Azure Pipelines. It provides compliance-grade visibility without requiring dedicated agents or full system access.
 
 ## Project Vision
 
@@ -45,6 +45,36 @@ GBS will deploy as a containerized sensor, injected into CI pipelines via a cust
 1. Automatically activate at the start of each pipeline job.
 2. Collect detailed telemetry data throughout the build and test steps.
 3. Export telemetry logs as artifacts immediately before the ephemeral environment disappears.
+
+## Continual Compliance (GC ITSG-33)
+
+Ghost-Based Sensors (GBS) maps directly to key Government of Canada security controls, so you get built-in evidence for continual compliance:
+
+- **SI-4 Information System Monitoring**  
+  Real-time eBPF telemetry (process, file, network events) captures attacks, anomalous behavior and unauthorized connections in your CI runners.
+
+- **CA-7 Continuous Monitoring**  
+  Automated start/stop of Sysdig/Falco plus post-run artifact analysis builds a fully instrumented, ongoing monitoring pipeline.
+
+- **AU-2/3 Audit Events & Content**  
+  Captures the right events (syscalls, process lifecycle, file I/O) with full context (timestamps, arguments, container labels) to satisfy audit-record requirements.
+
+- **AU-6 Audit Review, Analysis & Reporting**  
+  Produces raw `.scap` logs and high-level “changed-files” trails so you can review, analyze and report unusual activity on-demand.
+
+- **CM-3 Configuration Change Control**  
+  Your “changed-files” audit trail gives you an authoritative record of every source change made by the pipeline for systematic review.
+
+- **CM-8 System Component Inventory**  
+  Snapshots of Node.js/Python package manifests produce a precise inventory of runtime components for your CI environment.
+
+- **RA-5 Vulnerability Scanning**  
+  GBS outputs package manifests in a standard format so you can plug them into automated scanners (e.g. Dependabot, Snyk) for continuous vulnerability assessment.
+
+- **SI-7 Software & Information Integrity**  
+  Combined syscall tracing and file-change logs detect unauthorized modifications to your build artifacts or runner file system.
+
+By including GBS in every run, you get hands-off, continual evidence that you’re meeting these ITSG-33 requirements—no extra scripts or manual audits needed.  
 
 ##  Getting Started
 
