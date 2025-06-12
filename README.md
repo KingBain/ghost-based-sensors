@@ -1,6 +1,6 @@
 # Ghost-Based Sensors (GBS): Observability for Ephemeral CI/CD Pipelines
+ [![Continual Compliance](https://github.com/KingBain/ghost-based-sensors/actions/workflows/001-Example-Pipeline.yaml/badge.svg)](https://github.com/KingBain/ghost-based-sensors/actions/workflows/001-Example-Pipeline.yaml)
 
-Continual Compliance [![Ghost Based Sensors Example](https://github.com/KingBain/ghost-based-sensors/actions/workflows/001-Example-Pipeline.yaml/badge.svg)](https://github.com/KingBain/ghost-based-sensors/actions/workflows/001-Example-Pipeline.yaml)
 Ghost-Based Sensors is an open-source project that brings compliance-grade, syscall-level observability to ephemeral CI/CD pipelines. Under the hood it leverages [Falco for Actions](https://github.com/falcosecurity/falco-actions) as its engine—automating start/stop, rule injection, telemetry capture, and artifact packaging so you don’t have to deal with low-level configuration.
 
 ## Project Vision
