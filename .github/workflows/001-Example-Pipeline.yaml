@@ -12,7 +12,7 @@ jobs:
       contents: read
       actions: read
     steps:
-    - name: Start Falco
+    - name: Start Sysdig System Capture
       uses: KingBain/falco-actions/start@bpfprobe-confirm
       with:
         mode: analyze
@@ -72,7 +72,7 @@ jobs:
           python-packages.json
           changed-files.txt
 
-    - name: Stop Falco
+    - name: Stop Sysdig System Capture
       uses: falcosecurity/falco-actions/stop@4a4ff48cca452b3b03f06073d1ae0ff564503fc9
       with:
         mode: analyze
