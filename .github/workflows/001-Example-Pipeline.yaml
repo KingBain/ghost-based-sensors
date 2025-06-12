@@ -16,7 +16,6 @@ jobs:
       uses: KingBain/falco-actions/start@bpfprobe-confirm
       with:
         mode: analyze
-        verbose: true
 
 # BEGIN - Normal Pipeline Workload
     - name: Checkout repository
