@@ -19,9 +19,7 @@ Leveraging lightweight instrumentation and eBPF-based telemetry, Ghost-Based Sen
 | File System Activity    | Monitors file creations, deletions, and modifications to detect suspicious changes                 | File systyem monitoring |
 | Network Connections/DNS | Records all outbound connections and DNS lookups to reveal data exfiltration or unauthorized calls | Network monitoring      |
 
-A lot of this moniroting is done using the Falco (Sysdig) eBPF probe, which listens to permitted kernal events.
-
-Because of how actions and pipelines are executed, just whats happening inside the pipeline/action will be monitored, but in the grand scheme of things thats where our code lives, so its the right spot to start listening
+The majority of the monitoring is done using Sysdig BPF probes into the github runner kernel, this is reffered to the ["Modern eBPF" probe](https://falco.org/blog/falco-modern-bpf-0-35-0/)
 
 ## Who Is This For?
 
@@ -66,13 +64,13 @@ An **example pipeline** demonstrates how to integrate Ghost-Based Sensors into y
 
 This reference pipeline showcases:
 
-* Starting Falco in **analyze** mode to capture full telemetry.
+* Starting Sysdig in **analyze** mode to capture ephemeral system telemetry.
 * Executing the normal job workload (e.g., checkout and a 10‑second count).
+* Stopping Sysdig at the end of the job.
 * Snapshotting installed **Node.js** and **Python** packages.
-* Recording a **changed-files** list for provenance.
-* Uploading package manifests and changed-files as artifacts.
-* Stopping Falco at the end of the job.
-* A subsequent **analyze** job that generates a detailed forensic report.
+* Recording a **changed-files** log for Audit trail.
+* Uploading package manifests, changed-files logs and scap style System Capture as artifacts.
+* A subsequent **analyze** job(in the same action) that generates a detailed summary report.
 
 Use this pipeline as a template for your own public CI/CD workflows to harness the full power of GBS within ephemeral runners.
 
@@ -81,143 +79,51 @@ Use this pipeline as a template for your own public CI/CD workflows to harness t
 ### ASCII Fallback
 
 ```
-       CI/CD Job Start
-              |
-              v
-+--------------------------+
-|   Launch GBS Entrypoint  |
-+--------------------------+
-     |        |        |
-     v        v        v
- eBPF     tcpdump   Metrics Server
- Tracer   (fallback)     |
-     \        |        /
-      \       v       /
-        --> Trace Events
-              |
-              v
-       +--------------+
-       | Generate Logs |
-       +--------------+
-              |
-              v
-     Upload Artifacts (capture.tar.gz, hashes.json, etc)
-              |
-              v
-     Forensics / SIEM Integration
+           Github Job Start
+                  |
+                  v
+   +--------------------------------+
+   |    Start Sysdig Monitor        |
+   +--------------------------------+
+     |                      |
+     v                      v
+ +--------+           +----------------+
+ | eBPF   |           | Normal CICD    |
+ | Probe  |           | Jobs & Steps   |
+ +--------+           +----------------+
+     \                      |
+      \                     v
+       \------> Trace Events
+                  |
+                  v
+   +--------------------------------+
+   |   Stop Sysdig Entrypoint       |
+   +--------------------------------+
+                  |
+                  v
+        Upload Artifacts
+   (capture, hashes, lists, etc.)
+                  |
+                  v
+   +--------------------------------+
+   |      Analyze Artifacts         |
+   +--------------------------------+
+                  |
+                  v
+         Generate Summary
+
 ```
 
 
 ## Goals and Benefits
 
 * **Full Pipeline Observability:** Transforms ephemeral runners into transparent, auditable environments.
-* **Easy Integration:** Designed to be plug-and-play for popular CI providers, with minimal configuration.
-* **Forensic Capability:** Provides critical post-event analysis to rapidly identify, diagnose, and respond to potential security incidents.
+* **Easy Integration:** Plug-and-play support for popular CI providers with minimal configuration.
+* **Forensic Capability:** Enables rapid post-event analysis to identify, diagnose, and respond to security incidents.
+* **Pipeline Fingerprinting & Anomaly Detection:** Provides a framework for repository administrators to fingerprint CI/CD pipelines and author Falco rules to catch anomalies.
 
----
-
-##  Common Issues & Fixes
-
-This section helps you diagnose and resolve common problems when using Ghost-Based Sensors (GBS) in ephemeral CI/CD environments like GitHub Actions or Azure Pipelines.
-
-
-###  Issue: eBPF Tracing Fails to Start
-
-**Symptoms**:
-- No telemetry collected in `capture` artifact
-- Logs contain:  
-  ```sh
-  failed to load BPF program: operation not permitted
-  ```
-  or  
-  ```sh
-  BPF not supported by kernel
-  ```
-
-**Likely Causes**:
-- CI runner kernel doesn't support eBPF (older kernel version)
-- Missing Linux capabilities (e.g., `CAP_SYS_ADMIN`)
-- BPF tooling (e.g., `bpftool`, `bcc`) not installed in container
-
-**Fixes**:
-1.  Ensure runner supports eBPF. GitHub-hosted Ubuntu runners `ubuntu-latest` (>=20.04) generally support BPF.
-2.  Use `privileged: true` if running in Docker-in-Docker or custom runner (not supported on GitHub-hosted runners).
-3.  Confirm `bpftool` and required libraries (libbpf, libelf) are installed in your container image.
-4.  Use the fallback `tcpdump` mode in environments that lack eBPF support.
-
----
-
-###  Issue: Metrics Server Fails or Crashes
-
-**Symptoms**:
-- No port scraping metrics visible
-- Logs show Python or Go traceback:
-  ```sh
-  OSError: [Errno 98] Address already in use
-  ```
-  or  
-  ```sh
-  ImportError: No module named 'prometheus_client'
-  ```
-
-**Likely Causes**:
-- Port `9090` or similar already in use
-- Required runtime packages are missing (e.g., `prometheus_client` for Python, or Go metrics binary not compiled)
-
-**Fixes**:
-1.  Change metrics server port using the `METRICS_PORT` environment variable:
-   ```yaml
-   env:
-     METRICS_PORT: 9191
-   ```
-2.  Install missing packages in the container Dockerfile:
-   ```Dockerfile
-   pip install prometheus_client
-   ```
-3.  Confirm entrypoint script doesn’t background the metrics process too early (avoid `&` if startup order matters).
-
----
-
-###  Issue: Artifact Upload Fails
-
-**Symptoms**:
-- Artifacts not visible in GitHub Actions tab
-- Logs show:
-  ```sh
-  No such file or directory: 'capture.tar.gz'
-  ```
-  or  
-  ```sh
-  Artifact upload step skipped or failed
-  ```
-
-**Likely Causes**:
-- Capture files not generated due to earlier tracer failure
-- Artifact paths misaligned or missing
-- Upload step runs **before** artifacts are saved
-
-**Fixes**:
-1.  Use `post` job steps or conditional logic to delay upload:
-   ```yaml
-   if: always()
-   ```
-2.  Verify correct file path:
-   ```yaml
-   path: ./output/capture.tar.gz
-   ```
-3.  Add a debug step before upload to confirm files exist:
-   ```yaml
-   - run: ls -lh ./output
-   ```
-
----
 
 ##  License
 
-MIT License. See [LICENSE](LICENSE) for details.
+See [LICENSE](LICENSE) for details.
 
----
-
-## Getting Involved
-
-I'm starting fresh, and I want your help! If you're passionate about security, DevOps, or observability, your contributions can shape this innovative approach to pipeline visibility. Join me and help capture the ghostly world of ephemeral CI/CD runners.
