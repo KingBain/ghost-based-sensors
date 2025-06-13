@@ -1,4 +1,4 @@
-name: Repo Analysis
+name: Scan Analysis
 
 on:
   workflow_call:
