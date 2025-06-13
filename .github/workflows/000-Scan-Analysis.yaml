@@ -1,9 +1,7 @@
-name: Artifact Analysis
+name: Repo Analysis
 
 on:
-  workflow_run:
-    workflows: ["Ghost Based Sensors Example"]
-    types: [completed]
+  workflow_call:
 
 jobs:
   next-step:
@@ -26,43 +24,3 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-
-
-      - name: Download the “capture” artifact
-        run: |
-          gh run download ${{ github.event.workflow_run.id }} \
-            -n capture \
-            -D ./capture
-          # This will extract “capture.scap” into ./capture/
-
-      - name: Install Sysdig CLI
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y sysdig unzip
-
-      - name: Extract unique DNS domains
-        run: |
-          sysdig -r capture/capture.scap \
-            "evt.type=dns_response" -p "%fd.dns.resp.name" \
-            | sort -u > dns-domains.txt
-          echo "Found $(wc -l < dns-domains.txt) distinct domains"
-
-      - name: Check domains against OTX
-        if: ${{ steps.fetch.outputs.artifact_id }}
-        env:
-          OTX_API_KEY: ${{ secrets.OTX_API_KEY }}   # store your AlienVault OTX key in repo secrets
-        run: |
-          echo "domain,reputation" > otx-results.csv
-          while read domain; do
-            echo -n "Checking $domain… "
-            resp=$(curl -s \
-              -H "X-OTX-API-KEY: $OTX_API_KEY" \
-              "https://otx.alienvault.com/api/v1/indicators/domain/${domain}/reputation")
-            # extract the `reputation` field (–100 to +100)
-            rep=$(echo "$resp" | jq -r '.reputation // 0')
-            echo "$rep"
-            echo "${domain},${rep}" >> otx-results.csv
-          done < dns-domains.txt
-
-          echo "### Malicious Results (rep≠0)"
-          grep -v ',0$' otx-results.csv || echo "None flagged"
