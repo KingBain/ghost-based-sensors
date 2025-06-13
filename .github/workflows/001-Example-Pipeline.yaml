@@ -90,3 +90,7 @@ jobs:
         falco-version: '0.39.0'
       env:
         VT_API_KEY: ${{ secrets.VT_API_KEY }}
+        
+  repo-scan:
+    needs: sauce
+    uses: ./.github/workflows/000-Scan-Analysis.yaml
