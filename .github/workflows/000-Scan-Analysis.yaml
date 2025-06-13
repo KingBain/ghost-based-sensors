@@ -1,22 +1,22 @@
+---
+#000-Scan-Analysis.yaml
 name: Scan Analysis
 
 on:
   workflow_call:
 
 jobs:
-  next-step:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+  audit-scan:
     runs-on: ubuntu-latest
     steps:
-
       - name: Show triggering run info
         run: |
-          echo "Triggered by run: ${{ github.event.workflow_run.id }}"
-          echo "Run number:     ${{ github.event.workflow_run.run_number }}"
-          echo "Commit SHA:     ${{ github.event.workflow_run.head_sha }}"
-          echo "Branch:         ${{ github.event.workflow_run.head_branch }}"
-          echo "Triggered by:   ${{ github.event.workflow_run.actor }}"
-          echo "URL:            ${{ github.event.workflow_run.html_url }}"
+          echo "Triggered by run: ${{ github.event.workflow_call.id }}"
+          echo "Run number:     ${{ github.event.workflow_call.run_number }}"
+          echo "Commit SHA:     ${{ github.event.workflow_call.head_sha }}"
+          echo "Branch:         ${{ github.event.workflow_call.head_branch }}"
+          echo "Triggered by:   ${{ github.event.workflow_call.actor }}"
+          echo "URL:            ${{ github.event.workflow_call.html_url }}"
 
       - name: Authenticate GitHub CLI
         run: |
