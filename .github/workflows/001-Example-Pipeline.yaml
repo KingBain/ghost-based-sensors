@@ -17,7 +17,7 @@ jobs:
       with:
         mode: analyze
         #sysdig-version: "sha256:c63ec30ce5db5b0d934343028031bba32b81cb7cb3f82e82d87b72c9b1694922"
-        sysdig-version: 0.40.1
+        #sysdig-version: 0.40.1
 
 # BEGIN - Normal Pipeline Workload
     - name: Checkout repository
