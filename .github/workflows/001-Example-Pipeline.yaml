@@ -16,8 +16,8 @@ jobs:
       uses: falcosecurity/falco-actions/start@f3b08d497481ce1db0f4aa39e4e48a624a424c3f
       with:
         mode: analyze
-        #sysdig-version: "sha256:c63ec30ce5db5b0d934343028031bba32b81cb7cb3f82e82d87b72c9b1694922"
-        #sysdig-version: 0.40.1
+        sysdig-version: "sha256:sha256:c63ec30ce5db5b0d934343028031bba32b81cb7cb3f82e82d87b72c9b1694922"
+
 
 # BEGIN - Normal Pipeline Workload
     - name: Checkout repository
@@ -87,13 +87,14 @@ jobs:
       actions: read
     steps:
     - name: Analyze
-      uses: KingBain/falco-actions/analyze@domain
+      uses: falcosecurity/falco-actions/analyze@f3b08d497481ce1db0f4aa39e4e48a624a424c3f
       with:
-        falco-version: '0.39.0'
-      env:
-        VT_API_KEY: ${{ secrets.VT_API_KEY }}
+        falco-version: 'sha256:ba05dfb209cc1c2e912ce116d230b5f59c4542e7286f05b663c499066d5d6a42'
+      # env:
+      #  VT_API_KEY: ${{ secrets.VT_API_KEY }}
         
   repo-scan:
     needs: sauce
     uses: ./.github/workflows/000-Scan-Analysis.yaml
+
 
