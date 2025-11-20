@@ -34,7 +34,7 @@ jobs:
 # END - Normal Pipeline Workload
 
     - name: Stop Sysdig System Capture
-      uses: falcosecurity/falco-actions/stop@f3b08d497481ce1db0f4aa39e4e48a624a424c3f
+      uses: KingBain/falco-actions/stop@latest-upload
       with:
         mode: analyze
         
