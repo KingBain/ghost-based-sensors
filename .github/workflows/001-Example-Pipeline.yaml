@@ -87,11 +87,9 @@ jobs:
       actions: read
     steps:
     - name: Analyze
-      uses: falcosecurity/falco-actions/analyze@f3b08d497481ce1db0f4aa39e4e48a624a424c3f
-      #with:
-      #  falco-version: 'sha256:ba05dfb209cc1c2e912ce116d230b5f59c4542e7286f05b663c499066d5d6a42'
-      # env:
-      #  VT_API_KEY: ${{ secrets.VT_API_KEY }}
+      uses: KingBain/falco-actions/analyze@analyze-version
+      with:
+        falco-version: 'sha256:ba05dfb209cc1c2e912ce116d230b5f59c4542e7286f05b663c499066d5d6a42'
         
   repo-scan:
     needs: sauce
