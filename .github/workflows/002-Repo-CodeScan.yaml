@@ -1,0 +1,111 @@
+---
+#001-Example-Pipeline.yaml
+name: Trivy Code Scan Example
+
+on:
+  workflow_dispatch:
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+    - name: Start Sysdig System Capture
+      uses: gccloudone-aurora-collab/falco-actions/start@54d299d4c40de1ad6bf680fefbbfed1bc5b8f057
+      with:
+        mode: analyze
+        sysdig-version: "sha256:c63ec30ce5db5b0d934343028031bba32b81cb7cb3f82e82d87b72c9b1694922"
+        custom-rule-file: '.github/falco/rules/custom_rules.yaml'
+
+# BEGIN - Normal Pipeline Workload
+    - name: Checkout Repository
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        persist-credentials: false
+
+    - name: Run Trivy Scan Action
+      uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
+      with:
+        version: "v0.69.3"
+        severity: "CRITICAL,HIGH"
+        ignore-unfixed: true
+        scan-type: "fs"
+        format: "sarif"
+        output: "trivy-results.sarif"
+
+    - name: Upload Trivy Report to GitHub Code Scanning
+      uses: github/codeql-action/upload-sarif@9e907b5e64f6b83e7804b09294d44122997950d6 # v4.32.3
+      with:
+        sarif_file: trivy-results.sarif
+
+# END - Normal Pipeline Workload
+
+    - name: Stop Sysdig System Capture
+      uses: gccloudone-aurora-collab/falco-actions/stop@54d299d4c40de1ad6bf680fefbbfed1bc5b8f057
+      with:
+        mode: analyze
+        sysdig-version: "sha256:c63ec30ce5db5b0d934343028031bba32b81cb7cb3f82e82d87b72c9b1694922"
+        
+    - name: Snapshot Node.js Packages
+      shell: bash
+      run: |
+        echo "Recording Node.js packages…" >&2
+        if command -v npm &>/dev/null; then
+          npm ls --json --depth=0 > node-packages.json
+        else
+          echo "npm not found, skipping Node snapshot" >&2
+        fi
+      
+    - name: Get changed files
+      id: changed-files
+      uses: tj-actions/changed-files@ed68ef82c095e0d48ec87eccea555d944a631a4c # v46
+
+    - name: Save changed‑files list
+      env:
+        ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+      run: |
+        # Write each changed file on its own line
+        printf "%s\n" ${ALL_CHANGED_FILES} > changed-files.txt    
+
+    - name: Snapshot Python Packages
+      shell: bash
+      run: |
+        echo "Recording Python packages…" >&2
+        if command -v pip &>/dev/null; then
+          pip list --format=json > python-packages.json
+        else
+          echo "pip not found, skipping Python snapshot" >&2
+        fi
+      
+    - name: Upload Pipeline Manifests
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: package-manifests
+        path: |
+          node-packages.json
+          python-packages.json
+          changed-files.txt
+          
+  scan:
+    needs: capture 
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    steps:
+    - name: Analyze
+      uses: gccloudone-aurora-collab/falco-actions/analyze@54d299d4c40de1ad6bf680fefbbfed1bc5b8f057
+      with:
+        falco-version: 'sha256:ba05dfb209cc1c2e912ce116d230b5f59c4542e7286f05b663c499066d5d6a42'
+        custom-rule-file: '.github/falco/rules/custom_rules.yaml'
+        
+  repo-scan:
+    needs: scan
+    uses: ./.github/workflows/000-Scan-Analysis.yaml
+
+
+
