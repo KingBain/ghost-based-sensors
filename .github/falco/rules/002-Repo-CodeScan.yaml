@@ -2,20 +2,16 @@
 
 - rule: Source Code Overwrite
   desc: >
-    Detect the overwrite of source code during a build process. To be enabled only on workflows job that requires it.
-    The rule is based on the assumption that the common directory for checking out the repository is "/hom/runner/work/"
+    Detect writes under the checked-out workspace while excluding runner temp files.
   condition: >
-    open_write and fd.directory startswith "/home/runner/work/"
-  exceptions:
-  - name: proc_exepath_fd_directory
-    fields: [proc.exepath, fd.directory]
-    comps: [endswith, startswith]
-    values:
-    - ["Runner.Worker", "/home/runner/work/_temp"]
+    open_write and
+    fd.directory startswith "/home/runner/work/" and
+    not fd.directory startswith "/home/runner/work/_temp"
   output: A source code file %fd.name was overwritten by process %proc.name (file=%fd.name gparent=%proc.aname[2] ggparent=%proc.aname[3] gggparent=%proc.aname[4] evt_type=%evt.type user=%user.name user_uid=%user.uid user_loginuid=%user.loginuid process=%proc.name proc_exepath=%proc.exepath parent=%proc.pname command=%proc.cmdline terminal=%proc.tty container_id=%container.id container_name=%container.name container_image=%container.image.repository container_image_tag=%container.image.tag)
   priority: WARNING
   tags: [CI/CD]
 
+  
 - rule: Possible Workflow File Overwrite
   desc: >
     Detect the overwrite of a workflow file. To be enabled only where the job is not expected to change workflow files.
