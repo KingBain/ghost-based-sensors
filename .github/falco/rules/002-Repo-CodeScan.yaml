@@ -78,13 +78,17 @@
   priority: WARNING
   tags: [CI/CD]
 
-
 - list: allowed_https_domains
   items: [
     api.github.com,
     github.com,
     githubusercontent.com,
-    check.trivy.dev
+    check.trivy.dev,
+    blob.core.windows.net,
+    productionresultssa17.blob.core.windows.net,
+    productionresultssa3.blob.core.windows.net,
+    blob.bl5prdstrz24a.trafficmanager.net,
+    blob.bn9prdstrz04a.trafficmanager.net
   ]
 
 - rule: Unexpected HTTPS Destination
@@ -93,6 +97,7 @@
     evt.type=connect and
     fd.l4proto=tcp and
     fd.sport=443 and
+    not proc.name in (systemd-resolve) and
     not fd.sip.name in (allowed_https_domains)
   output: Unexpected HTTPS destination | connection=%fd.name proc=%proc.name exe=%proc.exepath parent=%proc.pname cmd=%proc.cmdline
   priority: WARNING
