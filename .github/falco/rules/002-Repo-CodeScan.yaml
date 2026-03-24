@@ -1,19 +1,5 @@
 - required_engine_version: 0.43.0
 
-- rule: Source Code Overwrite
-  desc: >
-    Detect writes under the checked-out workspace while excluding runner temp
-    files and Git metadata writes.
-  condition: >
-    open_write and
-    fd.directory startswith "/home/runner/work/" and
-    not fd.directory startswith "/home/runner/work/_temp" and
-    not fd.directory contains "/.git"
-  output: A source code file %fd.name was overwritten by process %proc.name (file=%fd.name gparent=%proc.aname[2] ggparent=%proc.aname[3] gggparent=%proc.aname[4] evt_type=%evt.type user=%user.name user_uid=%user.uid user_loginuid=%user.loginuid process=%proc.name proc_exepath=%proc.exepath parent=%proc.pname command=%proc.cmdline terminal=%proc.tty container_id=%container.id container_name=%container.name container_image=%container.image.repository container_image_tag=%container.image.tag)
-  priority: WARNING
-  tags: [CI/CD]
-
-
 - rule: Possible Workflow File Overwrite
   desc: >
     Detect the overwrite of a workflow file. To be enabled only where the job is not expected to change workflow files.
@@ -74,3 +60,40 @@
   priority: WARNING
   tags: [CI/CD]
 
+#Trivy pipeline Specific 
+
+- rule: Source Code Overwrite
+  desc: >
+    Detect writes under the checked-out workspace while excluding runner temp
+    files and Git metadata writes.
+  condition: >
+    open_write and
+    fd.directory startswith "/home/runner/work/" and
+    not fd.directory startswith "/home/runner/work/_temp" and
+    not fd.directory contains "/.git" and
+    not fd.directory contains "/.cache/trivy" and
+    not fd.name endswith "/trivy-results.sarif" and
+    not fd.name endswith "/trivy_envs.txt"
+  output: A source code file %fd.name was overwritten by process %proc.name (file=%fd.name gparent=%proc.aname[2] ggparent=%proc.aname[3] gggparent=%proc.aname[4] evt_type=%evt.type user=%user.name user_uid=%user.uid user_loginuid=%user.loginuid process=%proc.name proc_exepath=%proc.exepath parent=%proc.pname command=%proc.cmdline terminal=%proc.tty container_id=%container.id container_name=%container.name container_image=%container.image.repository container_image_tag=%container.image.tag)
+  priority: WARNING
+  tags: [CI/CD]
+
+
+- list: allowed_https_domains
+  items: [
+    api.github.com,
+    github.com,
+    githubusercontent.com,
+    check.trivy.dev
+  ]
+
+- rule: Unexpected HTTPS Destination
+  desc: Alert on outbound HTTPS connections to destinations outside the allowlist
+  condition: >
+    evt.type=connect and
+    fd.l4proto=tcp and
+    fd.sport=443 and
+    not fd.sip.name in (allowed_https_domains)
+  output: Unexpected HTTPS destination | connection=%fd.name proc=%proc.name exe=%proc.exepath parent=%proc.pname cmd=%proc.cmdline
+  priority: WARNING
+  tags: [network, ci-cd]
