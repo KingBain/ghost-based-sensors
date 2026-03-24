@@ -2,16 +2,18 @@
 
 - rule: Source Code Overwrite
   desc: >
-    Detect writes under the checked-out workspace while excluding runner temp files.
+    Detect writes under the checked-out workspace while excluding runner temp
+    files and Git metadata writes.
   condition: >
     open_write and
     fd.directory startswith "/home/runner/work/" and
-    not fd.directory startswith "/home/runner/work/_temp"
+    not fd.directory startswith "/home/runner/work/_temp" and
+    not fd.directory contains "/.git"
   output: A source code file %fd.name was overwritten by process %proc.name (file=%fd.name gparent=%proc.aname[2] ggparent=%proc.aname[3] gggparent=%proc.aname[4] evt_type=%evt.type user=%user.name user_uid=%user.uid user_loginuid=%user.loginuid process=%proc.name proc_exepath=%proc.exepath parent=%proc.pname command=%proc.cmdline terminal=%proc.tty container_id=%container.id container_name=%container.name container_image=%container.image.repository container_image_tag=%container.image.tag)
   priority: WARNING
   tags: [CI/CD]
 
-  
+
 - rule: Possible Workflow File Overwrite
   desc: >
     Detect the overwrite of a workflow file. To be enabled only where the job is not expected to change workflow files.
