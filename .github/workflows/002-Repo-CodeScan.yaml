@@ -50,6 +50,8 @@ jobs:
 
     - name: Stop Sysdig System Capture
       uses: gccloudone-aurora-collab/falco-actions/stop@0e08819f5c64d0374be9fbd664e751eab1005a09
+      env:
+        SYSDIG_VERSION: 'sha256:c63ec30ce5db5b0d934343028031bba32b81cb7cb3f82e82d87b72c9b1694922'
       with:
         mode: analyze
         
