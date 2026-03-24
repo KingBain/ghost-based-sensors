@@ -1,3 +1,6 @@
+---
+#002-repo-codescan.yaml custom rules
+
 - required_engine_version: 0.43.0
 
 - rule: Possible Workflow File Overwrite

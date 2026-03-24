@@ -51,47 +51,6 @@ jobs:
       with:
         mode: analyze
         
-    - name: Snapshot Node.js Packages
-      shell: bash
-      run: |
-        echo "Recording Node.js packages…" >&2
-        if command -v npm &>/dev/null; then
-          npm ls --json --depth=0 > node-packages.json
-        else
-          echo "npm not found, skipping Node snapshot" >&2
-        fi
-      
-    - name: Get changed files
-      id: changed-files
-      uses: tj-actions/changed-files@ed68ef82c095e0d48ec87eccea555d944a631a4c # v46
-
-    - name: Save changed‑files list
-      env:
-        ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
-      run: |
-        # Write each changed file on its own line
-        printf "%s\n" ${ALL_CHANGED_FILES} > changed-files.txt    
-
-    - name: Snapshot Python Packages
-      shell: bash
-      run: |
-        echo "Recording Python packages…" >&2
-        if command -v pip &>/dev/null; then
-          pip list --format=json > python-packages.json
-        else
-          echo "pip not found, skipping Python snapshot" >&2
-        fi
-      
-    - name: Upload Pipeline Manifests
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: package-manifests
-        path: |
-          node-packages.json
-          python-packages.json
-          changed-files.txt
-          
   scan:
     needs: capture 
     runs-on: ubuntu-latest
