@@ -50,7 +50,6 @@ jobs:
       uses: gccloudone-aurora-collab/falco-actions/stop@54d299d4c40de1ad6bf680fefbbfed1bc5b8f057
       with:
         mode: analyze
-        sysdig-version: "sha256:c63ec30ce5db5b0d934343028031bba32b81cb7cb3f82e82d87b72c9b1694922"
         
     - name: Snapshot Node.js Packages
       shell: bash
@@ -108,7 +107,7 @@ jobs:
       with:
         falco-version: 'sha256:ba05dfb209cc1c2e912ce116d230b5f59c4542e7286f05b663c499066d5d6a42'
         custom-rule-file: '${{ github.workspace }}/.github/falco/rules/002-Repo-CodeScan.yaml'
-        
+
   # disabled for now      
   #repo-scan:
   #  needs: scan
