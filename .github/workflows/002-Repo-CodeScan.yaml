@@ -62,7 +62,7 @@ jobs:
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
     - name: Analyze
-      uses: gccloudone-aurora-collab/falco-actions/analyze@54d299d4c40de1ad6bf680fefbbfed1bc5b8f057
+      uses: gccloudone-aurora-collab/falco-actions/analyze@0e08819f5c64d0374be9fbd664e751eab1005a09
       env:
         SYSDIG_VERSION: 'sha256:c63ec30ce5db5b0d934343028031bba32b81cb7cb3f82e82d87b72c9b1694922'
       with:
