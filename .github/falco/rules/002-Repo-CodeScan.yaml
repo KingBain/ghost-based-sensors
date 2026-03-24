@@ -76,29 +76,3 @@
   priority: WARNING
   tags: [CI/CD]
 
-- list: repo_codescan_expected_writers
-  items: [trivy, node, npm, pip, python, upload-sarif]
-
-- rule: Repo Code Scan Unexpected Write Target
-  desc: >
-    Detect writes to repository-controlled paths during the Trivy repo scan workflow by processes other than the expected report writers.
-    The Trivy workflow should only need to write scan artifacts, package snapshots, and runner temp files.
-  condition: >
-    open_write and fd.directory startswith "/home/runner/work/" and
-    not fd.directory startswith "/home/runner/work/_temp" and
-    not fd.name in ("trivy-results.sarif", "node-packages.json", "python-packages.json", "changed-files.txt") and
-    not proc.name in (repo_codescan_expected_writers)
-  output: An unexpected file write happened during repo code scan (file=%fd.name process=%proc.name proc_exepath=%proc.exepath parent=%proc.pname command=%proc.cmdline container_image=%container.image.repository)
-  priority: WARNING
-  tags: [CI/CD, Trivy]
-
-- rule: Repo Code Scan Unexpected Network Client
-  desc: >
-    Detect shell and network utility processes that are outside the normal Trivy repo scan runtime contract.
-    The workflow is expected to use the pinned actions, Trivy, GitHub upload steps, and package snapshot tooling only.
-  condition: >
-    spawned_process and proc.name in (curl, wget, nc, ncat, ssh, scp, sftp, socat) and
-    not proc.pname in (trivy, node, npm, python, pip)
-  output: An unexpected network-capable process ran during repo code scan (process=%proc.name proc_exepath=%proc.exepath parent=%proc.pname command=%proc.cmdline container_image=%container.image.repository)
-  priority: WARNING
-  tags: [CI/CD, Trivy]

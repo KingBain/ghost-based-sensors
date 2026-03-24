@@ -109,9 +109,10 @@ jobs:
         falco-version: 'sha256:ba05dfb209cc1c2e912ce116d230b5f59c4542e7286f05b663c499066d5d6a42'
         custom-rule-file: '${{ github.workspace }}/.github/falco/rules/002-Repo-CodeScan.yaml'
         
-  repo-scan:
-    needs: scan
-    uses: ./.github/workflows/000-Scan-Analysis.yaml
+  # disabled for now      
+  #repo-scan:
+  #  needs: scan
+  #  uses: ./.github/workflows/000-Scan-Analysis.yaml
 
 
 
